@@ -25,3 +25,11 @@ export interface HealthDataPoint {
   time: string;
   score: number;
 }
+
+export interface PipelineResult {
+  alerts: AlertLogEntry[];
+  shutdownAlarms: ShutdownAlarm[];
+  totalShuttingDown: number;
+  totalActiveSpike: number;
+  healthHistory: Map<string, HealthDataPoint[]>; // key: "MODEL_NAME|MACHINE_TAG"
+}

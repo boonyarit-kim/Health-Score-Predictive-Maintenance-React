@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, ChevronDown } from 'lucide-react';
-import { AlertLogEntry } from '../types';
+import { AlertLogEntry, HealthDataPoint } from '../types';
 import { generateHealthData } from '../data/mockData';
 import HealthChart from './HealthChart';
 
@@ -14,14 +14,17 @@ const ACTION_OPTIONS = [
 
 interface Props {
   entry: AlertLogEntry;
+  healthHistory?: HealthDataPoint[];
   onClose: () => void;
 }
 
-export default function ModelPopup({ entry, onClose }: Props) {
+export default function ModelPopup({ entry, healthHistory, onClose }: Props) {
   const [selectedAction, setSelectedAction] = useState(ACTION_OPTIONS[0]);
   const [note, setNote] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [chartData] = useState(() => generateHealthData());
+  const [chartData] = useState<HealthDataPoint[]>(() =>
+    healthHistory && healthHistory.length > 0 ? healthHistory : generateHealthData()
+  );
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,7 +53,7 @@ export default function ModelPopup({ entry, onClose }: Props) {
         style={{
           backgroundColor: '#1a2035',
           border: '1px solid #2d3748',
-          width: '440px',
+          width: '460px',
           maxHeight: '90vh',
           overflowY: 'auto',
         }}
@@ -61,11 +64,13 @@ export default function ModelPopup({ entry, onClose }: Props) {
           style={{ borderBottom: '1px solid #2d3748' }}
         >
           <div>
-            <p className="text-xs" style={{ color: '#9ca3af' }}>
-              <span style={{ color: '#cbd5e1' }}>Model :</span> {entry.modelDisplayName}
+            <p className="text-xs">
+              <span style={{ color: '#cbd5e1' }}>Model : </span>
+              <span style={{ color: '#9ca3af' }}>{entry.modelDisplayName}</span>
             </p>
-            <p className="text-xs mt-0.5" style={{ color: '#9ca3af' }}>
-              <span style={{ color: '#cbd5e1' }}>Tag :</span> {entry.tag}
+            <p className="text-xs mt-0.5">
+              <span style={{ color: '#cbd5e1' }}>Tag : </span>
+              <span style={{ color: '#9ca3af' }}>{entry.tag}</span>
             </p>
           </div>
           <button
@@ -79,7 +84,7 @@ export default function ModelPopup({ entry, onClose }: Props) {
 
         {/* Chart */}
         <div className="px-4 pt-4 pb-2">
-          <HealthChart data={chartData} width={400} height={200} />
+          <HealthChart data={chartData} width={420} height={200} />
         </div>
 
         {/* Update Record */}
@@ -110,7 +115,10 @@ export default function ModelPopup({ entry, onClose }: Props) {
                   <ChevronDown
                     size={14}
                     className="flex-shrink-0 transition-transform"
-                    style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', color: '#6b7280' }}
+                    style={{
+                      transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                      color: '#6b7280',
+                    }}
                   />
                 </button>
 
@@ -123,13 +131,17 @@ export default function ModelPopup({ entry, onClose }: Props) {
                       <button
                         key={opt.label}
                         onClick={() => { setSelectedAction(opt); setDropdownOpen(false); }}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-left transition-colors hover:bg-opacity-10"
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-left"
                         style={{
                           color: '#e2e8f0',
-                          backgroundColor: selectedAction.label === opt.label ? '#2d3748' : 'transparent',
+                          backgroundColor:
+                            selectedAction.label === opt.label ? '#2d3748' : 'transparent',
                         }}
                         onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#2d3748')}
-                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = selectedAction.label === opt.label ? '#2d3748' : 'transparent')}
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.backgroundColor =
+                            selectedAction.label === opt.label ? '#2d3748' : 'transparent')
+                        }
                       >
                         <span
                           className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0"
